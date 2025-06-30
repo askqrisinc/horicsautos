@@ -1,0 +1,234 @@
+<?php
+// Connect to DB
+require 'db.php';
+
+// Fetch vehicles
+$stmt = $pdo->query("SELECT * FROM vehicles ORDER BY id DESC");
+$vehicles = $stmt->fetchAll(PDO::FETCH_ASSOC);
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Horics Autos - Find Your Perfect Car</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f8f9fc;
+    }
+    header {
+      background: #001f3f url('hero-car2.png') center/cover no-repeat;
+      min-height: 300px;
+      color: white;
+      text-align: center;
+      padding: 80px 0 40px;
+    }
+    header h1 {
+      font-size: 2.5rem;
+    }
+
+    .search-form {
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      margin-top: -60px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .search-form .form-control, .search-form .form-select {
+      border-radius: 8px;
+      font-size: 0.95rem;
+    }
+
+    .search-form button {
+      background-color: #ff4f1c;
+      color: white;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      padding: 10px;
+    }
+
+    .vehicle-card .card {
+      border: none;
+      border-radius: 12px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+    }
+
+    .vehicle-card img {
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+      height: 200px;
+      object-fit: cover;
+    }
+
+    #compare-section, #contact-section, #reviews {
+      background: #fff;
+      border-radius: 10px;
+      padding: 30px;
+      margin-bottom: 40px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    }
+
+    .btn-outline-secondary:hover {
+      background-color: #f1f1f1;
+    }
+
+    blockquote {
+      font-size: 1rem;
+      border-left: 5px solid #ffb400;
+      padding-left: 15px;
+      margin: 20px 0;
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- Hero Section -->
+<header>
+  <h1>FIND YOUR PERFECT CAR</h1>
+</header>
+
+<!-- Search Filters -->
+<section class="container search-form mt-4">
+  <form id="filterForm" class="row g-2">
+    <div class="col-md"><input type="text" id="searchInput" class="form-control" placeholder="Make or Model"></div>
+    <div class="col-md"><select id="fuelFilter" class="form-select"><option value="">Fuel Type</option><option>Petrol</option><option>Diesel</option><option>Hybrid</option></select></div>
+    <div class="col-md"><select id="bodyFilter" class="form-select"><option value="">Body Type</option><option>SUV</option><option>Coupe</option><option>Sedan</option></select></div>
+    <div class="col-md"><button type="button" class="btn w-100" onclick="filterVehicles()">Search</button></div>
+  </form>
+</section>
+<input type="text" id="search" class="form-control" placeholder="Search by Make or Model">
+<!-- Vehicle Inventory -->
+<section class="container py-5">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Vehicle Inventory</h2>
+    <a href="#" class="text-decoration-none">View All &gt;</a>
+  </div>
+  <div class="row" id="vehicleList">
+    <?php foreach ($vehicles as $v): ?>
+      <div class="col-md-4 mb-4 vehicle-card"
+           data-make="<?= strtolower($v['make']) ?>"
+           data-model="<?= strtolower($v['model']) ?>"
+           data-fuel="<?= strtolower($v['fuel_type']) ?>"
+           data-body="<?= strtolower($v['body_type']) ?>">
+        <div class="card h-100">
+          <img src="<?= htmlspecialchars($v['image']) ?>" class="card-img-top" alt="<?= $v['make'] ?>">
+          <div class="card-body">
+            <h5 class="card-title"><?= $v['year'] ?> <?= $v['make'] ?> <?= $v['model'] ?></h5>
+            <p class="card-text">$<?= number_format($v['price']) ?> | <?= number_format($v['mileage']) ?> mi</p>
+            <a href="vehicle.php?id=<?= $v['id'] ?>" class="btn btn-primary btn-sm">View Details</a>
+            <a href="#" class="btn btn-outline-secondary btn-sm">History Report</a>
+          </div>
+        </div>
+      </div>
+    <?php endforeach; ?>
+  </div>
+</section>
+
+<!-- Compare Section -->
+<section class="container" id="compare-section">
+  <h3 class="mb-3">Compare Vehicles</h3>
+  <div class="d-flex justify-content-between align-items-center flex-wrap">
+    <div class="d-flex gap-3">
+      <div>2020 Mustang</div>
+      <div>VS</div>
+      <div>2021 RAV4</div>
+    </div>
+    <a href="compare.php?ids=1,2" class="btn btn-primary">Compare</a>
+  </div>
+</section>
+<div id="vehicle-list">
+  <div class="vehicle-card" data-make="Ford" data-model="Mustang">...</div>
+  <div class="vehicle-card" data-make="Honda" data-model="Accord">...</div>
+</div>
+
+<!-- Contact Section -->
+<section class="container" id="contact-section">
+  <h3>Contact the Owner</h3>
+  <div class="row mt-3">
+    <div class="col-md-6">
+      <form>
+        <input type="text" class="form-control" placeholder="Name" required>
+        <input type="email" class="form-control" placeholder="Email" required>
+        <input type="tel" class="form-control" placeholder="Phone">
+        <textarea class="form-control" placeholder="Message"></textarea>
+        <button class="btn mt-3">Send Message</button>
+      </form>
+    </div>
+    <div class="col-md-6">
+      <p><strong>📞</strong> 1226-436-11800</p>
+      <p><strong>📧</strong> info@horicsautos.com</p>
+    </div>
+  </div>
+</section>
+
+<!-- Reviews -->
+<section class="container" id="reviews">
+  <h3>Reviews & Testimonials</h3>
+  <blockquote>
+    ⭐⭐⭐⭐⭐<br>
+    "Great experience! The staff was very helpful and made the car buying process easy. Highly recommend!"
+    <footer>– John D.</footer>
+  </blockquote>
+</section>
+<div id="vehicle-list">
+  <div class="vehicle-card" data-make="Ford" data-model="Mustang">...</div>
+  <div class="vehicle-card" data-make="Honda" data-model="Accord">...</div>
+</div>
+
+<script>
+document.getElementById('search').addEventListener('input', function () {
+  const keyword = this.value.toLowerCase();
+  document.querySelectorAll('.vehicle-card').forEach(card => {
+    const make = card.getAttribute('data-make').toLowerCase();
+    const model = card.getAttribute('data-model').toLowerCase();
+    card.style.display = (make.includes(keyword) || model.includes(keyword)) ? 'block' : 'none';
+  });
+});
+let compareList = [];
+
+function addToCompare(vehicleId) {
+  if (!compareList.includes(vehicleId)) {
+    compareList.push(vehicleId);
+  }
+  updateCompareUI();
+}
+
+function updateCompareUI() {
+  document.getElementById("compareCount").textContent = compareList.length;
+}
+
+function openComparePage() {
+  const url = `compare.html?ids=${compareList.join(',')}`;
+  window.location.href = url;
+}
+
+function filterVehicles() {
+  const keyword = document.getElementById('searchInput').value.toLowerCase();
+  const fuel = document.getElementById('fuelFilter').value.toLowerCase();
+  const body = document.getElementById('bodyFilter').value.toLowerCase();
+
+  document.querySelectorAll('.vehicle-card').forEach(card => {
+    const make = card.getAttribute('data-make');
+    const model = card.getAttribute('data-model');
+    const fuelType = card.getAttribute('data-fuel');
+    const bodyType = card.getAttribute('data-body');
+
+    const matchSearch = !keyword || make.includes(keyword) || model.includes(keyword);
+    const matchFuel = !fuel || fuelType === fuel;
+    const matchBody = !body || bodyType === body;
+
+    card.style.display = (matchSearch && matchFuel && matchBody) ? 'block' : 'none';
+  });
+}
+</script>
+
+</body>
+</html>
